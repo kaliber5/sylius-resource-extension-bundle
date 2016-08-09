@@ -1,2 +1,2 @@
 parameters:
-  sylius.routing.loader.resource.class: AppBundle\Routing\ResourceLoader # replace the sylius resource loader
+  sylius.routing.loader.resource.class: Kaliber5\SyliusResourceExtensionBundle\Routing\ResourceLoader # replace the sylius resource loader
