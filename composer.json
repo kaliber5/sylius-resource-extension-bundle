@@ -1,0 +1,22 @@
+{
+    "name": "kaliber5/sylius-resource-extension-bundle",
+    "description": "Extends the SyliusResourceBundle",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Andreas Schacht",
+            "email": "schacht@kaliber5.de"
+        },
+        {
+            "name": "Simon Ihmig",
+            "email": "ihmig@kaliber5.de"
+        }
+    ],
+    "require": {
+        "symfony/symfony": "^2.7.0",
+        "sylius/resource-bundle": "^0.17"
+    },
+    "autoload": {
+        "psr-4": { "Kaliber5\\SyliusResourceExtensionBundle\\": "SyliusResourceExtensionBundle/" }
+    }
+}

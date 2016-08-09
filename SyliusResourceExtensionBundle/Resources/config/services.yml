@@ -1,0 +1,2 @@
+parameters:
+  sylius.routing.loader.resource.class: AppBundle\Routing\ResourceLoader # replace the sylius resource loader
