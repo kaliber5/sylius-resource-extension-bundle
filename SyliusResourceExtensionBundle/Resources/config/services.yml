@@ -1,2 +1,3 @@
 parameters:
   sylius.routing.loader.resource.class: Kaliber5\SyliusResourceExtensionBundle\Routing\ResourceLoader # replace the sylius resource loader
+  sylius.resource_controller.request_configuration.class: Kaliber5\SyliusResourceExtensionBundle\Request\JsonApiRequestConfiguration # replace the sylius RequestConfiguration
