@@ -109,7 +109,12 @@ class SyliusFilterEntityRepository extends EntityRepository
             }
             Assert::oneOf($comparator, $allowedOperators, 'Unknown comparison operator "'.$comparator);
             if ($comparator === Comparison::EQ && is_array($value)) {
-                $part = $this->getEntityManager()->getExpressionBuilder()->in($key, $value);
+                if (empty($value)) {
+                    // if array is empty, build expression which is always false
+                    $part = $this->getEntityManager()->getExpressionBuilder()->eq(1, 0);
+                } else {
+                    $part = $this->getEntityManager()->getExpressionBuilder()->in($key, $value);
+                }
             } elseif ($comparator === Comparison::NEQ && is_array($value)) {
                 $part = $this->getEntityManager()->getExpressionBuilder()->notIn($key, $value);
             } else {
