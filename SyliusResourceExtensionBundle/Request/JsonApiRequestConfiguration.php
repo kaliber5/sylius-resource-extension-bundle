@@ -32,19 +32,19 @@ class JsonApiRequestConfiguration extends RequestConfiguration
         $criteria = parent::getCriteria($criteria);
         if ($this->isFilterable()) {
             $filters = $this->getRequestParameter('filter', []);
-            $criteria = array_merge($filters, $criteria);
             $filterfields = $this->getFilterFields();
             if (!empty($filterfields)) {
                 $allowed = array_filter(
-                    $criteria,
+                    $filters,
                     function ($field) use ($filterfields) {
                         return in_array($field, $filterfields);
                     },
                     ARRAY_FILTER_USE_KEY
                 );
-                $criteria = $allowed;
+                $filters = $allowed;
             }
         }
+        $criteria = array_merge($filters, $criteria);
 
         return $criteria;
     }
