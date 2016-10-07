@@ -30,6 +30,7 @@ class JsonApiRequestConfiguration extends RequestConfiguration
     public function getCriteria(array $criteria = [])
     {
         $criteria = parent::getCriteria($criteria);
+        $filters = [];
         if ($this->isFilterable()) {
             $filters = $this->getRequestParameter('filter', []);
             $filterfields = $this->getFilterFields();
