@@ -97,7 +97,7 @@ For discrete values:
 ```
 or:
 ```json
-{"!=":["excellent", "good"]}
+{"<>":["excellent", "good"]}
 ```
 This will result in the following query expression: `key IN ("excellent", "good")`
 respectively `key NOT IN ("excellent", "good")`
