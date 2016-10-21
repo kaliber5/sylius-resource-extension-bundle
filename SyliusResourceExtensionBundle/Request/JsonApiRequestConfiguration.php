@@ -51,6 +51,62 @@ class JsonApiRequestConfiguration extends RequestConfiguration
     }
 
     /**
+     * Use the JSONAPI specs for sorting, use the sort param
+     *
+     * Sylius sort style:  ...?sorting[name]=ASC&sorting[age]=DESC
+     * JSONAPI sort style: ...?sort=name,-age
+     *
+     * @param array $sorting
+     *
+     * @return array
+     */
+    public function getSorting(array $sorting = [])
+    {
+        $defaultSorting = array_merge($this->parameters->get('sorting', []), $sorting);
+
+        if ($this->isSortable()) {
+            $sorting = $this->convertSorting($this->request->get('sort'));
+            foreach ($defaultSorting as $key => $value) {
+                if (!isset($sorting[$key])) {
+                    $sorting[$key] = $value;
+                }
+            }
+
+            return $sorting;
+        }
+
+        return $defaultSorting;
+    }
+
+    /**
+     * Converts the JSONAPI sort to the Sylius style
+     *
+     * Sylius sort style:  ...?sorting[name]=ASC&sorting[age]=DESC
+     * JSONAPI sort style: ...?sort=name,-age
+     *
+     * @param string $jsonApiSort
+     *
+     * @return array Sortingarray with [property => sorting,..]
+     */
+    protected function convertSorting($jsonApiSort)
+    {
+        $syliusSort = [];
+        if (is_string($jsonApiSort)) {
+            $keys = explode(',', $jsonApiSort);
+            foreach ($keys as $key) {
+                if ($key[0] === '-') {
+                    $key = substr($key, 1);
+                    $syliusSort[$key] = 'DESC';
+                } else {
+                    $syliusSort[$key] = 'ASC';
+                }
+            }
+        }
+
+        return $syliusSort;
+    }
+
+    /**
      * returns the available filter fields or empty array if the fields weren't restricted
      *
      * @return array
