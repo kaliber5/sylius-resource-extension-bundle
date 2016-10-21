@@ -4,26 +4,23 @@ Kaliber5SyliusResourceExtensionBundle
 SonataAdmin
 -----------
 
-If your EntityRepository extends the
+This Bundle replaces the ModelManager from the "sonata-project/doctrine-orm-admin-bundle". So you have register this bundle AFTER the SonataAdminBundle in 
+your AppKernel.php
 
-    Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository
-
-you should use the SyliusRepositoryAdminTrait in your Admin class, because the find method is incompatible with the use in the Admin's ModelManager
-
-    <php
-    
-    use Sonata\AdminBundle\Admin\Admin;
-    use Kaliber5\SyliusResourceExtensionBundle\SonataAdmin\SyliusRepositoryAdminTrait;
-    
-    class ExampleAdmin extends Admin
+    public function registerBundles()
     {
-        use SyliusRepositoryAdminTrait;
-        
-        //...   
+        $bundles = array(
+            ...
+            new Sonata\AdminBundle\SonataAdminBundle(),
+            ...
+            new Kaliber5\SyliusResourceExtensionBundle\Kaliber5SyliusResourceExtensionBundle(),
+            ...
+        );
+        ...
     }
+            
 
-
-If you entity implements the
+If your entity implements the
 
     Sylius\Component\Translation\Model\TranslatableInterface
      
@@ -32,6 +29,19 @@ you should use the
     Kaliber5\SyliusResourceExtensionBundle\SonataAdmin\TranslatableAdminTrait
     
 in your Admin class to inject a default- and fallbackLocale on new created objects.
+
+    <php
+    
+    use Sonata\AdminBundle\Admin\Admin;
+    use Kaliber5\SyliusResourceExtensionBundle\SonataAdmin\TranslatableAdminTrait;
+    
+    class ExampleAdmin extends Admin
+    {
+        use TranslatableAdminTrait;
+        
+        //...   
+    }
+
 
 
 ResourceLoader
