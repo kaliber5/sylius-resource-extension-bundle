@@ -1,3 +1,19 @@
 parameters:
   sylius.routing.loader.resource.class: Kaliber5\SyliusResourceExtensionBundle\Routing\ResourceLoader # replace the sylius resource loader
   sylius.resource_controller.request_configuration.class: Kaliber5\SyliusResourceExtensionBundle\Request\JsonApiRequestConfiguration # replace the sylius RequestConfiguration
+
+services:
+  sylius.resource_controller.request_configuration_factory:
+    class: Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactory
+    arguments: [ "@sylius.resource_controller.parameters_parser", "%sylius.resource_controller.request_configuration.class%", "%sylius.resource.settings%"]
+    public: false
+
+  sylius.routing.loader.resource:
+    class: "%sylius.routing.loader.resource.class%"
+    arguments: ["@sylius.resource_registry", "@private.sylius.route_factory"]
+    tags:
+      - { name: routing.loader }
+
+  private.sylius.route_factory:
+    class: Sylius\Bundle\ResourceBundle\Routing\RouteFactory
+    public: false

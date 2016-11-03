@@ -77,7 +77,8 @@ class SyliusFilterEntityRepository extends EntityRepository
      * Allowed comparison operators: =, >, >=, <, <=, <>
      *
      * @param string $key
-     * @param string $hash
+     * @param array $hash
+     * @param string $expression
      *
      * @return \Doctrine\ORM\Query\Expr\Andx
      * @throws \InvalidArgumentException
