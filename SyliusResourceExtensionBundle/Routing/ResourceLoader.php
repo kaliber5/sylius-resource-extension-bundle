@@ -26,7 +26,7 @@ use \Sylius\Bundle\ResourceBundle\Routing\ResourceLoader as BaseResourceLoader;
 /**
  * This class removes the trailing slash on the generated routes
  */
-class ResourceLoader extends BaseResourceLoader implements LoaderInterface
+class ResourceLoader implements LoaderInterface
 {
     /**
      * @var RegistryInterface
@@ -44,7 +44,6 @@ class ResourceLoader extends BaseResourceLoader implements LoaderInterface
      */
     public function __construct(RegistryInterface $resourceRegistry, RouteFactoryInterface $routeFactory)
     {
-        parent::__construct($resourceRegistry, $routeFactory);
         $this->resourceRegistry = $resourceRegistry;
         $this->routeFactory = $routeFactory;
     }
@@ -81,34 +80,56 @@ class ResourceLoader extends BaseResourceLoader implements LoaderInterface
         $rootPath = sprintf('/%s', isset($configuration['path']) ? $configuration['path'] : Urlizer::urlize($metadata->getPluralName()));
 
         if (in_array('index', $routesToGenerate)) {
-            $indexRoute = $this->createRoute($metadata, $configuration, $rootPath, 'index', ['GET']);
+            $indexRoute = $this->createRoute($metadata, $configuration, $rootPath, 'index', ['GET'], $isApi);
             $routes->add($this->getRouteName($metadata, $configuration, 'index'), $indexRoute);
         }
 
         if (in_array('create', $routesToGenerate)) {
-            $createRoute = $this->createRoute($metadata, $configuration, $isApi ? $rootPath : $rootPath.'new', 'create', $isApi ? ['POST'] : ['GET', 'POST']);
+            $createRoute = $this->createRoute($metadata, $configuration, $isApi ? $rootPath : $rootPath.'new', 'create', $isApi ? ['POST'] : ['GET', 'POST'], $isApi);
             $routes->add($this->getRouteName($metadata, $configuration, 'create'), $createRoute);
         }
 
         if (in_array('update', $routesToGenerate)) {
-            $updateRoute = $this->createRoute($metadata, $configuration, $isApi ? $rootPath.'/{id}' : $rootPath.'/{id}/edit', 'update', $isApi ? ['PUT', 'PATCH'] : ['GET', 'PUT', 'PATCH']);
+            $updateRoute = $this->createRoute($metadata, $configuration, $isApi ? $rootPath.'/{id}' : $rootPath.'/{id}/edit', 'update', $isApi ? ['PUT', 'PATCH'] : ['GET', 'PUT', 'PATCH'], $isApi);
             $routes->add($this->getRouteName($metadata, $configuration, 'update'), $updateRoute);
         }
 
         if (in_array('show', $routesToGenerate)) {
-            $showRoute = $this->createRoute($metadata, $configuration, $rootPath.'/{id}', 'show', ['GET']);
+            $showRoute = $this->createRoute($metadata, $configuration, $rootPath.'/{id}', 'show', ['GET'], $isApi);
             $routes->add($this->getRouteName($metadata, $configuration, 'show'), $showRoute);
         }
 
         if (in_array('delete', $routesToGenerate)) {
-            $deleteRoute = $this->createRoute($metadata, $configuration, $rootPath.'/{id}', 'delete', ['DELETE']);
+            $deleteRoute = $this->createRoute($metadata, $configuration, $rootPath.'/{id}', 'delete', ['DELETE'], $isApi);
             $routes->add($this->getRouteName($metadata, $configuration, 'delete'), $deleteRoute);
         }
 
         return $routes;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function supports($resource, $type = null)
+    {
+        return 'sylius.resource' === $type || 'sylius.resource_api' === $type;
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getResolver()
+    {
+        // Intentionally left blank.
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setResolver(LoaderResolverInterface $resolver)
+    {
+        // Intentionally left blank.
+    }
 
     /**
      * @param MetadataInterface $metadata
@@ -116,26 +137,46 @@ class ResourceLoader extends BaseResourceLoader implements LoaderInterface
      * @param string $path
      * @param string $actionName
      * @param array $methods
+     * @param bool $isApi
      *
      * @return Route
      */
-    private function createRoute(MetadataInterface $metadata, array $configuration, $path, $actionName, array $methods)
+    private function createRoute(MetadataInterface $metadata, array $configuration, $path, $actionName, array $methods, $isApi = false)
     {
         $defaults = [
             '_controller' => $metadata->getServiceId('controller').sprintf(':%sAction', $actionName),
         ];
 
-        if (isset($configuration['form']) && in_array($actionName, ['create', 'update'])) {
+        if ($isApi && 'index' === $actionName) {
+            $defaults['_sylius']['serialization_groups'] = ['Default'];
+        }
+        if ($isApi && in_array($actionName, ['show', 'create', 'update'], true)) {
+            $defaults['_sylius']['serialization_groups'] = ['Default', 'Detailed'];
+        }
+        if (isset($configuration['grid']) && 'index' === $actionName) {
+            $defaults['_sylius']['grid'] = $configuration['grid'];
+        }
+        if (isset($configuration['form']) && in_array($actionName, ['create', 'update'], true)) {
             $defaults['_sylius']['form'] = $configuration['form'];
         }
         if (isset($configuration['section'])) {
             $defaults['_sylius']['section'] = $configuration['section'];
         }
-        if (isset($configuration['templates']) && in_array($actionName, ['show', 'index', 'create', 'update'])) {
+        if (isset($configuration['templates']) && in_array($actionName, ['show', 'index', 'create', 'update'], true)) {
             $defaults['_sylius']['template'] = sprintf('%s:%s.html.twig', $configuration['templates'], $actionName);
         }
-        if (isset($configuration['redirect']) && in_array($actionName, ['create', 'update'])) {
+        if (isset($configuration['redirect']) && in_array($actionName, ['create', 'update'], true)) {
             $defaults['_sylius']['redirect'] = $this->getRouteName($metadata, $configuration, $configuration['redirect']);
+        }
+        if (isset($configuration['permission'])) {
+            $defaults['_sylius']['permission'] = $configuration['permission'];
+        }
+        if (isset($configuration['vars']['all'])) {
+            $defaults['_sylius']['vars'] = $configuration['vars']['all'];
+        }
+        if (isset($configuration['vars'][$actionName])) {
+            $vars = isset($configuration['vars']['all']) ? $configuration['vars']['all'] : [];
+            $defaults['_sylius']['vars'] = array_merge($vars, $configuration['vars'][$actionName]);
         }
 
         return $this->routeFactory->createRoute($path, $defaults, [], [], '', [], $methods);

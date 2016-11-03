@@ -62,10 +62,10 @@ class JsonApiRequestConfiguration extends RequestConfiguration
      */
     public function getSorting(array $sorting = [])
     {
-        $defaultSorting = array_merge($this->parameters->get('sorting', []), $sorting);
+        $defaultSorting = array_merge($this->getParameters()->get('sorting', []), $sorting);
 
         if ($this->isSortable()) {
-            $sorting = $this->convertSorting($this->request->get('sort'));
+            $sorting = $this->convertSorting($this->getRequest()->get('sort'));
             foreach ($defaultSorting as $key => $value) {
                 if (!isset($sorting[$key])) {
                     $sorting[$key] = $value;
@@ -117,7 +117,7 @@ class JsonApiRequestConfiguration extends RequestConfiguration
      */
     protected function getFilterFields()
     {
-        $filterFields = $this->parameters->get('filter', []);
+        $filterFields = $this->getParameters()->get('filter', []);
         Assert::isArray($filterFields, 'wrong route configuration: defaults._sylius.filter must be an array');
 
         return $filterFields;
