@@ -22,6 +22,7 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Yaml\Yaml;
 use Sylius\Bundle\ResourceBundle\Routing\Configuration;
 use \Sylius\Bundle\ResourceBundle\Routing\ResourceLoader as BaseResourceLoader;
+use Webmozart\Assert\Assert;
 
 /**
  * This class removes the trailing slash on the generated routes
@@ -57,6 +58,10 @@ class ResourceLoader implements LoaderInterface
         $configurationDefinition = new Configuration();
 
         $configuration = Yaml::parse($resource);
+        if (!isset($configuration['permission'])) {
+            $configuration['permission'] = true;
+        }
+
         $configuration = $processor->processConfiguration($configurationDefinition, ['routing' => $configuration]);
 
         if (!empty($configuration['only']) && !empty($configuration['except'])) {
