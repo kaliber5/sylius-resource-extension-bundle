@@ -79,6 +79,14 @@ class JsonApiRequestConfiguration extends RequestConfiguration
     }
 
     /**
+     * @return bool
+     */
+    public function isCsrfProtectionEnabled()
+    {
+        return $this->getParameters()->get('csrf_protection', false);
+    }
+
+    /**
      * Converts the JSONAPI sort to the Sylius style
      *
      * Sylius sort style:  ...?sorting[name]=ASC&sorting[age]=DESC
