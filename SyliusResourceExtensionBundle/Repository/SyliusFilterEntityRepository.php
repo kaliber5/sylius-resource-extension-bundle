@@ -28,7 +28,7 @@ class SyliusFilterEntityRepository extends EntityRepository
      * @param QueryBuilder $queryBuilder
      * @param array        $criteria
      */
-    protected function applyCriteria(QueryBuilder $queryBuilder, array $criteria = [])
+    protected function applyCriteria(QueryBuilder $queryBuilder, array $criteria = []): void
     {
         foreach ($criteria as $property => $value) {
             $this->assertValidFieldName($property);

@@ -21,8 +21,6 @@ use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Yaml\Yaml;
 use Sylius\Bundle\ResourceBundle\Routing\Configuration;
-use \Sylius\Bundle\ResourceBundle\Routing\ResourceLoader as BaseResourceLoader;
-use Webmozart\Assert\Assert;
 
 /**
  * This class removes the trailing slash on the generated routes

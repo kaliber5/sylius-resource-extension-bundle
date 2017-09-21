@@ -13,10 +13,10 @@
         }
     ],
     "require": {
+        "php": "^7.1",
         "symfony/symfony": "^3.2",
         "doctrine/orm": "^2.4",
-        "sylius/resource-bundle": "^1.0.0-beta1@dev",
-        "sylius/resource": "^1.0.0-beta1@dev",
+        "sylius/resource-bundle": "^1.0.0",
         "webmozart/assert": "^1.0"
     },
     "autoload": {
