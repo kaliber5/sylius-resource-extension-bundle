@@ -32,7 +32,7 @@ class JsonApiRequestConfiguration extends RequestConfiguration
         $criteria = parent::getCriteria($criteria);
         $filters = [];
         if ($this->isFilterable()) {
-            $filters = $this->getRequestParameter('filter', []);
+            $filters = $this->convertFilters($this->getRequestParameter('filter', []));
             $filterfields = $this->getFilterFields();
             if (!empty($filterfields)) {
                 $allowed = array_filter(
@@ -48,6 +48,14 @@ class JsonApiRequestConfiguration extends RequestConfiguration
         $criteria = array_merge($filters, $criteria);
 
         return $criteria;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFilterable()
+    {
+        return $this->getParameters()->get('filterable', true);
     }
 
     /**
@@ -118,14 +126,32 @@ class JsonApiRequestConfiguration extends RequestConfiguration
     }
 
     /**
-     * returns the available filter fields or empty array if the fields weren't restricted
+     * convert the filter value to an array if it's comma separated
+     *
+     * @param array $filter
+     *
+     * @return array
+     */
+    protected function convertFilters(array $filter): array
+    {
+        foreach ($filter as $key => $value) {
+            if (preg_match("#^{.*}$#", $value) === 0 && strpos($value, ',') !== false) {
+                $filter[$key] = explode(',', $value);
+            }
+        }
+
+        return $filter;
+    }
+
+    /**
+     * returns the available filter fields or the 'id'-field by default
      *
      * @return array
      * @throws \InvalidArgumentException
      */
     protected function getFilterFields()
     {
-        $filterFields = $this->getParameters()->get('filter', []);
+        $filterFields = $this->getParameters()->get('filter', ['id']);
         Assert::isArray($filterFields, 'wrong route configuration: defaults._sylius.filter must be an array');
 
         return $filterFields;
