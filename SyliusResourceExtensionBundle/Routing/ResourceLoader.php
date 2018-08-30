@@ -66,7 +66,7 @@ class ResourceLoader implements LoaderInterface
             throw new \InvalidArgumentException('You can configure only one of "except" & "only" options.');
         }
 
-        $routesToGenerate = ['show', 'index', 'create', 'update', 'delete'];
+        $routesToGenerate = ['show', 'index', 'create', 'update', 'delete', 'bulkDelete'];
 
         if (!empty($configuration['only'])) {
             $routesToGenerate = $configuration['only'];
@@ -105,6 +105,11 @@ class ResourceLoader implements LoaderInterface
         if (in_array('delete', $routesToGenerate)) {
             $deleteRoute = $this->createRoute($metadata, $configuration, $rootPath.'/{id}', 'delete', ['DELETE'], $isApi);
             $routes->add($this->getRouteName($metadata, $configuration, 'delete'), $deleteRoute);
+        }
+
+        if (!$isApi && in_array('bulkDelete', $routesToGenerate, true)) {
+            $bulkDeleteRoute = $this->createRoute($metadata, $configuration, $rootPath . '/bulk-delete', 'bulkDelete', ['DELETE'], $isApi);
+            $routes->add($this->getRouteName($metadata, $configuration, 'bulk_delete'), $bulkDeleteRoute);
         }
 
         return $routes;
@@ -165,8 +170,18 @@ class ResourceLoader implements LoaderInterface
         if (isset($configuration['section'])) {
             $defaults['_sylius']['section'] = $configuration['section'];
         }
+        if (!empty($configuration['criteria'])) {
+            $defaults['_sylius']['criteria'] = $configuration['criteria'];
+        }
+        if (array_key_exists('filterable', $configuration)) {
+            $defaults['_sylius']['filterable'] = $configuration['filterable'];
+        }
         if (isset($configuration['templates']) && in_array($actionName, ['show', 'index', 'create', 'update'], true)) {
-            $defaults['_sylius']['template'] = sprintf('%s:%s.html.twig', $configuration['templates'], $actionName);
+            $defaults['_sylius']['template'] = sprintf(
+                false === strpos($configuration['templates'], ':') ? '%s/%s.html.twig' : '%s:%s.html.twig',
+                $configuration['templates'],
+                $actionName
+            );
         }
         if (isset($configuration['redirect']) && in_array($actionName, ['create', 'update'], true)) {
             $defaults['_sylius']['redirect'] = $this->getRouteName($metadata, $configuration, $configuration['redirect']);
@@ -180,6 +195,13 @@ class ResourceLoader implements LoaderInterface
         if (isset($configuration['vars'][$actionName])) {
             $vars = isset($configuration['vars']['all']) ? $configuration['vars']['all'] : [];
             $defaults['_sylius']['vars'] = array_merge($vars, $configuration['vars'][$actionName]);
+        }
+        if ($actionName === 'bulkDelete') {
+            $defaults['_sylius']['paginate'] = false;
+            $defaults['_sylius']['repository'] = [
+                'method'    => 'findById',
+                'arguments' => ['$ids'],
+            ];
         }
 
         return $this->routeFactory->createRoute($path, $defaults, [], [], '', [], $methods);
